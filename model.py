@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
+import scipy.optimize as sc
 #first pariticipant
 def participant1(forecastPrice, prices, stored, opinion):
     bCap = 1000
@@ -9,79 +9,67 @@ def participant1(forecastPrice, prices, stored, opinion):
     consumption = 20
 
     demand = ( forecastPrice - prices[-1] ) / ( aversion * volatility )
-    deltaStore = consumption - demand
+
 
     if (demand + stored[-1] - consumption > bCap):
-        demand = bcap + stored[-1] - consumption
+        demand = bCap + stored[-1] - consumption
     elif(demand + stored[-1] - consumption < 0):
         demand = consumption - stored[-1]
 
     deltaStore = consumption - demand
 
     changeProb = forecastType(prices, opinion)
-    if ( changeProb > 0.5 and opinion == 1):
+    if ( changeProb > 0.3 and opinion == 1):
         opinion = 2
-    elif( changeProb > 0.5 and opinion == 2):
+    elif( changeProb > 0.3 and opinion == 2):
         opinion = 1
 
-    return demand, stored[-1] - deltaStore , opinion
+    return demand, stored[-1] - deltaStore, opinion
 
 #second participant
 def participant2(forecastPrice, prices, stored, opinion):
     bCap = 1000
     aversion = 1.2
     volatility = 0.1
-    consumption = 20
+    consumption = 15
 
     demand = ( forecastPrice - prices[-1] ) / ( aversion * volatility )
-    deltaStore = consumption - demand
 
     if (demand + stored[-1] - consumption > bCap):
-        demand = bcap + stored[-1] - consumption
+        demand = bCap + stored[-1] - consumption
     elif(demand + stored[-1] - consumption < 0):
         demand = consumption - stored[-1]
 
     deltaStore = consumption - demand
 
     changeProb = forecastType(prices, opinion)
-    if ( changeProb > 0.5 and opinion == 1):
+    if ( changeProb > 0.8 and opinion == 1):
         opinion = 2
-    elif( changeProb > 0.5 and opinion == 2):
+    elif( changeProb > 0.8 and opinion == 2):
         opinion = 1
 
     return demand, stored[-1] - deltaStore, opinion
 
 #randomly generate generation
 #maybe a different function? maybe constraints?
-def generation(generationMat):
-    return generationMat[-1] + np.random.normal(0, 10)
+def generation(generationMat, mean):
+    return  generationMat[-1] + 0.8 * (mean - generationMat[-1]) + np.random.normal(0, 10)
 
 #find the market clearing price using newtons method
 #maybe something to restrict if no solution?
 def marketClearing(forecastPrice1, forecastPrice2, stored1, stored2, generationMat, beliefs1, beliefs2, pric):
-    tolerance = 0.00001
-    dp = 0.01
-    p0 = 10
     f = lambda p :  participant1(forecastPrice1, np.append(pric, p), stored1, beliefs1[-1])[0] + participant2(forecastPrice2, np.append(pric, p), stored2, beliefs2[-1])[0] - generationMat[-1]
-    f0 = f(p0)
-    p1 = p0 - f0 / ( (f0 - f(p0 + dp)) / dp )
+    p1 = sc.bisect(f, -10**10, 10**10)
 
-    while(abs(p1 - p0) / p0 > tolerance):
-        p0 = p1
-        f0 = f(p0)
-        p1 = p0 - f0 / ( (f0 - f(p0 + dp)) / dp )
-        # print(p1)
-    print(p1)
     return p1
 
-#forecasts for the market price, take latest price
-#WARNING: CHECK THAT -2 STUFF FOR THE PRICES!
+#forecasts for the market price, momentum
 def forecast1(prices):
-    return prices[-2]
+    return prices[-2] + (prices[-2] - prices[-3])
 
 #forecast for market price, take average of last four time periods
 def forecast2(price):
-    return np.mean(price[-4:-1])
+    return np.mean(price[-5:-2])
 
 #calculate the probability of changing
 def forecastType(price, setting):
@@ -94,10 +82,10 @@ def forecastType(price, setting):
 
 #-------MAIN-----------
 #1. generate initial prices
-prices = np.array([-25, -24, -25, -24])
+prices = np.array([25, 24, 25, 24, 22])
 
 #2. generate initial generation
-generationArray = np.array([70])
+generationArray = np.array([100])
 
 #3. generate initial beliefs
 belief1 = np.array([1])
@@ -121,16 +109,14 @@ for i in range(100):
 
     belief1 = np.append(belief1, setting1)
     belief2 = np.append(belief2, setting2)
-    storage1 = np.append(storage1, storage1[-1] - deltaStore1)
-    storage2 = np.append(storage2, storage2[-1] - deltaStore2)
+    storage1 = np.append(storage1, deltaStore1)
+    storage2 = np.append(storage2, deltaStore2)
 
     newPrice = marketClearing(forecast1(prices), forecast2(prices), storage1, storage2, generationArray, belief1, belief2, prices)
-    generationArray = np.append(generationArray, generation(generationArray))
+    generationArray = np.append(generationArray, generation(generationArray, 40)) #with mean
     prices = np.append(prices, newPrice)
 
     #ask:
-    # 1. root finding
-    # 2. changing from one opinion to another
-    # 3. what types of forecasts should i use?
-    # 4. starting data
-    # 5. 
+    # 2. changing from one opinion to another: assign randomly, current strategy is fine. generate a random number to see if they change. maybe try a different strategy with storage capacities
+    #TODO: implement multiple agents
+    #TODO: read over the stuff
