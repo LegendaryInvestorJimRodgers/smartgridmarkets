@@ -1,22 +1,25 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.optimize as sc
+import math
 
 #market participant
 def participant(forecastPrice, prices, stored, opinion, bCap, aversions, volatilities, consumption, probability):
     demand = ( forecastPrice - prices[-1] ) / ( aversions * volatilities )
-
+    rate = 2
     if (demand + stored - consumption > bCap):
         demand = bCap - stored - consumption
-        # print("the demand is:", demand)
-        # print("the capacity is:", bCap)
-        # print("the storage is:", stored)
-        # print("the consumption is:", consumption)
-        # print("the forecast price is:", forecastPrice)
     elif(demand + stored - consumption < 0):
         demand = consumption - stored
 
     deltaStore = consumption - demand
+
+    if (deltaStore > rate * consumption):
+        demand = -consumption
+        deltaStore = rate * consumption
+    elif(deltaStore < -rate * consumption):
+        demand = (rate + 1) * consumption
+        deltaStore = -rate * consumption
 
     changeProb = forecastType(prices, opinion)
     if ( changeProb > probability and opinion == 1):
@@ -47,7 +50,8 @@ def forecast(prices, setting):
     if setting == 1: #trend extrapolation
         return prices[-2] + (prices[-2] - prices[-3])
     elif setting == 2: #average of four prices
-        return np.mean(prices[-5:-2])
+        return prices[-2]
+        # return np.mean(prices[-5:-2])
 
 
 #calculate the probability of changing
@@ -69,7 +73,7 @@ def GenerateBeliefs(n, prob1):
 def GenerateStorage(n, capacities):
     storages = np.zeros([n, 1])
     for i in range(n):
-            storages[i] = capacities[np.random.randint(0, len(capacities))] / 2
+            storages[i] = capacities[np.random.randint(0, len(capacities))] / 2 #change initial capacity here
 
     return storages
 
@@ -97,7 +101,7 @@ def generation(generationMat, mean):
 #-------MAIN-----------
 #generate initial prices
 prices = np.array([25, 24, 25, 24, 22])
-n = 50
+n = 100
 time = 100
 prob1 = 0.3
 capacities = np.array([500, 200, 300, 600])
@@ -140,5 +144,3 @@ for i in range(time):
     prices = np.append(prices, newPrice)
 
 #TODO: the fundamental price is when the forecast is the same as the realized price. We can for now assume that the fundamental price is fixed (fixed generation too)
-#TODO: read the papers on real options
-#TODO: implement the fixed withdrawal and injection rates
