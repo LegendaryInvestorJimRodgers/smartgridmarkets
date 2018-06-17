@@ -5,7 +5,9 @@ import math
 
 #market participant
 def participant(forecastPrice, prices, stored, opinion, bCap, aversions, volatilities, consumption, probability):
-    demand = ( forecastPrice - prices[-1] ) / ( aversions * volatilities )
+    r = 0.8
+    optionality = 0.9
+    demand = consumption + (optionality + forecastPrice - (1 + r) * prices[-1] ) / ( 2 * aversions * volatilities )
     rate = 2
     if (demand + stored - consumption > bCap):
         demand = bCap - stored - consumption
@@ -50,8 +52,7 @@ def forecast(prices, setting):
     if setting == 1: #trend extrapolation
         return prices[-2] + (prices[-2] - prices[-3])
     elif setting == 2: #average of four prices
-        return prices[-2]
-        # return np.mean(prices[-5:-2])
+        return np.mean(prices[-5:-2])
 
 
 #calculate the probability of changing
@@ -102,7 +103,7 @@ def generation(generationMat, mean):
 #generate initial prices
 prices = np.array([25, 24, 25, 24, 22])
 n = 100
-time = 100
+time = 1000
 prob1 = 0.3
 capacities = np.array([500, 200, 300, 600])
 aversion = np.array([5, 3, 6, 2, 18])
