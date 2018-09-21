@@ -19,6 +19,6 @@ F = sympy.Matrix([fp, fn])
 J = F.jacobian([p, n1])
 
 # eigenvalues
-eigs = J.eigenvals()
+# eigs = J.eigenvals()
 
 # find the places where eigs are less tha one

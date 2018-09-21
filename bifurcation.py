@@ -70,12 +70,11 @@ if (__name__ == '__main__'):
     variances = []
     c = 2 * np.sin(np.linspace(1, time/12, time))
     values = []
-    imgx = 530
-    imgy =  140
-    image = Image.new("RGB", (imgx, imgy))
-
+    imgx = 1000
+    imgy =  70
+    increment = 1
     #loop over time
-    for cost in np.arange(0, imgy, 0.5):
+    for cost in np.arange(1, imgy, increment):
         for i in range(time):
             newPrice, delta = MarketClearing(i, c[i], r, prices, store[-1], belief[-1], bCap, aversion, volatility, consumption, n)
 
@@ -86,14 +85,17 @@ if (__name__ == '__main__'):
 
         values.append(np.unique(np.floor(prices)))
 
-    # change this
     count = 0
     array = np.asarray(values)
     min = np.min(array[-1])
-    array = array + abs(min)
     max = np.max(array[-1])
+    array = array - min
 
-    for i in range(imgy):
+    imgx = imgy / increment - 1
+    imgy = max - min + 1
+    image = Image.new("RGB", (int(imgx), int(imgy)))
+
+    for i in range(int(imgx)):
         for j in array[i]:
-            image.putpixel((int(j), i), (255, 255, 255))
+            image.putpixel((i, int(j)), (255, 255, 255))
     image.show()

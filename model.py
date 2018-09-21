@@ -4,11 +4,9 @@ import scipy.optimize as sc
 import math
 
 #market participant
-def participant(forecastPrice, prices, stored, opinion, bCap, aversions, volatilities, consumption, probability):
-    r = 0.8
-    optionality = 0.9
+def participant(optionality, r, beta, forecastPrice, prices, stored, opinion, bCap, aversions, volatilities, consumption):
     demand = consumption + (optionality + forecastPrice - (1 + r) * prices[-1] ) / ( 2 * aversions * volatilities )
-    rate = 2
+
     if (demand + stored - consumption > bCap):
         demand = bCap - stored - consumption
     elif(demand + stored - consumption < 0):
@@ -16,113 +14,93 @@ def participant(forecastPrice, prices, stored, opinion, bCap, aversions, volatil
 
     deltaStore = consumption - demand
 
-    if (deltaStore > rate * consumption):
-        demand = -consumption
-        deltaStore = rate * consumption
-    elif(deltaStore < -rate * consumption):
-        demand = (rate + 1) * consumption
-        deltaStore = -rate * consumption
-
-    changeProb = forecastType(prices, opinion)
-    if ( changeProb > probability and opinion == 1):
-        opinion = 2
-    elif( changeProb > probability and opinion == 2):
+    ruleOneProb = forecastType(optionality, r, beta, prices)
+    if ( ruleOneProb > np.random.uniform()):
         opinion = 1
+    else:
+        opinion = 2
 
     return demand, stored - deltaStore, opinion
 
 #calculate the demand curve
-def demandCurve(n, storage, generationMat, beliefs, bCap, aversion, pric, p, probability, consumptionMat):
+def demandCurve(volatility, optionality, beta, r, n, storage, generationMat, beliefs, bCap, aversion, pric, p, consumptionMat):
     f = 0
     for i in range(n):
-        f = f + participant(forecast(pric, beliefs[i]), np.append(pric, p), storage[i], beliefs[i], bCap[i], aversion[i], volatility[i], consumptionMat[i], probability[i])[0]
+        f = f + participant(optionality, r, beta, forecast(optionality, r, pric, beliefs[i]), np.append(pric, p), storage[i], beliefs[i], bCap[i], aversion[i], volatility[i], consumptionMat[i])[0]
+    if f > np.sum(bCap): f = np.sum(bCap)
 
     f = f - generationMat[-1]
     return f
 
 #find the market clearing price using newtons method
-def marketClearing(n, storage, generationMat, beliefs, bCap, aversion, pric, probability, consumptionMat):
-    f = lambda p: demandCurve(n, storage, generationMat, beliefs, bCap, aversion, pric, p, probability, consumptionMat)
+def marketClearing(volatility, beta, n, r, optionality, storage, generationMat, beliefs, bCap, aversion, pric, consumptionMat):
+    f = lambda p: demandCurve(volatility, optionality, beta, r, n, storage, generationMat, beliefs, bCap, aversion, pric, p, consumptionMat)
     p = sc.bisect(f, -10**10, 10**10)
-
     return p
 
 #forecasts for the market price, momentum
-def forecast(prices, setting):
+def forecast(optionality, r, prices, setting):
     if setting == 1: #trend extrapolation
-        return prices[-2] + (prices[-2] - prices[-3])
-    elif setting == 2: #average of four prices
-        return np.mean(prices[-5:-2])
+        return optionality / r +  1.03 * (prices[-2] - optionality / r)
+    elif setting == 2: #fundamental price
+        return optionality / r
 
+#calculate the probability of choosing rule one
+def forecastType(optionality, r, beta, price):
+    pi1 = -( forecast(optionality, r, price, 1) - price[-2] ) ** 2
+    pi2 = -( forecast(optionality, r, price, 2) - price[-2] ) ** 2
+    return 1 / ( 1 + np.exp(beta * ( pi2 - pi1 )) )
 
-#calculate the probability of changing
-def forecastType(price, setting):
-    return np.exp(abs(forecast(price, setting) - price[-1])) / ( np.exp(abs(forecast(price, setting) - price[-1])) + abs(forecast(price, setting) - price[-1]) )
-
-#generate beliefs here
-def GenerateBeliefs(n, prob1):
-    beliefs = np.zeros([n, 1])
-    for i in range(n):
-        if (np.random.uniform(0, 1) < prob1):
-            beliefs[i] = 1
-        else:
-            beliefs[i] = 2
-
-    return beliefs
-
-#generate storage here
-def GenerateStorage(n, capacities):
-    storages = np.zeros([n, 1])
-    for i in range(n):
-            storages[i] = capacities[np.random.randint(0, len(capacities))] / 2 #change initial capacity here
-
-    return storages
-
-def GenerateCharacteristics(n, bCap, aversions, volatilty, consumptions, probabilities):
+def GenerateCharacteristics(n, bCap, aversions, volatilty, consumptions, capacities, prob1):
     bCapMat = np.zeros([n, 1])
     aversionMat = np.zeros([n, 1])
     volatilityMat = np.zeros([n, 1])
     consumptionsMat = np.zeros([n, 1])
-    probabilitiesMat = np.zeros([n, 1])
+    beliefs = np.zeros([n, 1])
+    storages = np.zeros([n, 1])
 
     for i in range(n):
             bCapMat[i] = capacities[np.random.randint(0, len(bCap))]
-            aversionMat[i] = aversion[np.random.randint(0, len(aversion))]
+            aversionMat[i] = aversions[np.random.randint(0, len(aversions))]
             volatilityMat[i] = volatilty[np.random.randint(0, len(volatilty))]
             consumptionsMat[i] = consumptions[np.random.randint(0, len(consumptions))]
-            probabilitiesMat[i] = probabilities[np.random.randint(0, len(probabilities))]
+            storages[i] = capacities[np.random.randint(0, len(capacities))] / 2 #change initial storage here
 
-    return bCapMat, aversionMat, volatilityMat, consumptionsMat, probabilitiesMat
+            if (np.random.uniform(0, 1) < prob1):
+                beliefs[i] = 1
+            else:
+                beliefs[i] = 2
+
+
+    return bCapMat, aversionMat, volatilityMat, consumptionsMat, storages, beliefs
 
 #randomly generate generation
 #maybe a different function? maybe constraints?
 def generation(generationMat, mean):
-    return  generationMat[-1] + 0.8 * (mean - generationMat[-1]) + np.random.normal(0, 10)
+    if(np.random.uniform(0, 1) < 0.005):
+        return mean + np.random.normal(0, 10) # + 0.2  * np.sin(len(generationMat) / 365)
+    else:
+        return mean #+ 0.2 * np.sin(len(generationMat) / 365)
 
-#-------MAIN-----------
+# -------MAIN-----------
 #generate initial prices
-prices = np.array([25, 24, 25, 24, 22])
-n = 100
-time = 1000
+n = 10
+time = 10000
 prob1 = 0.3
-capacities = np.array([500, 200, 300, 600])
-aversion = np.array([5, 3, 6, 2, 18])
-consumption = np.array([20, 30, 10])
-probabilities = np.array([0.3, 0.5, 0.8, 0.4])
+capacities = np.array([600, 300, 300])
+aversion = np.array([50, 30, 60, 20, 18])
+consumption = np.array([30, 50, 30])
 volatility = np.array([1.2])
-
-#generate beliefs
-beliefs = GenerateBeliefs(n, prob1)
-
-#4. generate intiial storage
-storage = GenerateStorage(n, capacities)
+beta = 3
+optionality = 2
+r = 0.05
+percentage = []
+totalStorage = []
+prices = np.ones([10, 1]) * optionality / r
 
 #per participant
-capacities, aversion, volatility, consumptionMat, probabilities = GenerateCharacteristics(n, capacities, aversion, volatility, consumption, probabilities)
-
-#mean generation is the average consumption
-meanGeneration = np.mean(consumption)
-generationArray = np.array([n * meanGeneration])
+capacities, aversion, volatility, consumptionMat, storage, beliefs = GenerateCharacteristics(n, capacities, aversion, volatility, consumption, capacities, prob1)
+generationArray = np.array([np.sum(consumptionMat)])
 
 #5. then loop over things in the correct order and see what happens
 for i in range(time):
@@ -131,17 +109,38 @@ for i in range(time):
     settingTemp = []
 
     for j in range(n):
-        consumption, deltaStore, setting = participant(forecast(prices, beliefs[j, -1]), prices, storage[j, -1], beliefs[j, -1], capacities[j], aversion[j], volatility[j], consumptionMat[j], probabilities[j])
+        consumption, deltaStore, setting = participant(optionality, r, beta, forecast(optionality, r, prices, beliefs[j, -1]), prices, storage[j, -1], beliefs[j, -1], capacities[j], aversion[j], volatility[j], consumptionMat[j])
         consumptionTemp = np.append(consumptionTemp, consumption)
         deltaStoreTemp = np.append(deltaStoreTemp, deltaStore)
         settingTemp = np.append(settingTemp, setting)
 
-    #concatenate temp arrays to full one
+        #concatenate temp arrays to full one
     beliefs = np.c_[beliefs, settingTemp]
     storage = np.c_[storage, deltaStoreTemp]
 
-    newPrice = marketClearing(n, storage[:, i], generationArray, beliefs[:, i], capacities, aversion, prices, probabilities, consumptionMat)
-    generationArray = np.append(generationArray, generation(generationArray, n * meanGeneration)) #with mean
+    newPrice = marketClearing(volatility, beta, n, r, optionality, storage[:, i], generationArray, beliefs[:, i], capacities, aversion, prices, consumptionMat)
+    generationArray = np.append(generationArray, generation(generationArray, np.sum(consumptionMat))) #with mean
     prices = np.append(prices, newPrice)
 
-#TODO: the fundamental price is when the forecast is the same as the realized price. We can for now assume that the fundamental price is fixed (fixed generation too)
+for k in range(time):
+    percent = (beliefs[:, k] == 1).sum() / len(beliefs[:, 0])
+    percentage.append(percent)
+    totalStorage.append(np.sum(storage[:,k]))
+
+plt.figure()
+plt.subplot(211)
+plt.plot(prices)
+
+plt.subplot(212)
+plt.plot(percentage)
+
+# plt.subplot(212)
+# plt.plot(totalStorage)
+plt.show()
+
+#TODO: phase portraits
+#TODO: volatility over a moving window
+#TODO: bifurcation and stability
+#TODO: add noise term for the amateur investors
+#TODO: find a better prediction function for seasonality
+#TODO: mean time before failure
