@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.optimize as sc
 import matplotlib.pyplot as plt
+from PIL import Image
 
 #demand curve on an aggergate level
 def DemandCurve(time, c, r, prices, stored, belief, bCap, aversion, volatility, consumption, n):
@@ -54,48 +55,47 @@ def ForecastPercentage(beta, c, r, prices, aversion, cost, n, time, consumption,
 #characteristics for aggregate
 if (__name__ == '__main__'):
     r = 0.05
-    prices = np.array([2, -2])
-    prices2 = prices
     belief = np.array([0.5])
     bCap = 100
     aversion = 2
     volatility = 3
     consumption = 40
     time = 100
-    n = 100
-
+    # n = 100
+    store = np.array([bCap / 2])
     beta = 0.03
     eta = 0.1
-    # cost = 2
-    beliefAvg = []
-    storage = []
+    cost = 2
     variances = []
-    derivatives = []
     c = 2 * np.sin(np.linspace(1, time/12, time))
-    distrubance = 0.01
-
+    values = []
+    imgx = 6000
+    imgy =  70
+    increment = 1
     #loop over time
-    for cost in np.arange(0, 50, 0.5):
-        store = np.array([bCap / 2])
+    for n in np.arange(1, imgy, increment):
+        prices = np.array([0, 0])
         for i in range(time):
             newPrice, delta = MarketClearing(i, c[i], r, prices, store[-1], belief[-1], bCap, aversion, volatility, consumption, n)
-            prices2[-1] = prices[-1] + distrubance
-            newPrice2, delta2 = MarketClearing(i, c[i], r, prices2, store[-1], belief[-1], bCap, aversion, volatility, consumption, n)
 
             prices = np.append(prices, newPrice)
-            prices2 = np.append(prices2, newPrice2)
             store = np.append(store, store[-1] + delta)
             belief = np.append(belief, ForecastPercentage(beta, c[i], r, prices, aversion, cost, n, time, consumption, belief, eta))
+            # variances = np.append(variances, np.var(prices))
 
-        beliefAvg = np.append(beliefAvg, np.mean(belief[-time:]))
-        variances = np.append(variances, np.var(prices[-time:]))
-        storage = np.append(storage, store[-time:])
-        derivative = np.log(abs((prices2[-time:] - prices[-time:])/distrubance))
-        # derivative = derivative[derivative >= -1E308]
-        derivatives = np.append(derivatives, np.mean(derivative))
-    # plt.plot(derivatives)
-    # # plt.yscale('log')
-    # plt.xlabel('cost')
-    # plt.ylabel('LPE')
-    # plt.tight_layout()
-    # plt.show()
+        values.append(np.unique(np.floor(prices)))
+
+    count = 0
+    array = np.asarray(values)
+    min = np.min(array[0])
+    max = np.max(array[0])
+    array = array - min
+
+    imgx = imgy / increment - 1
+    imgy = max - min + 1
+    image = Image.new("RGB", (int(imgx), int(imgy)))
+
+    for i in range(int(imgx)):
+        for j in array[i]:
+            image.putpixel((i, int(j)), (255, 255, 255))
+    image.show()

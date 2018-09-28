@@ -30,8 +30,8 @@ def GetForecast(c, r, prices, belief, aversion, n, volatility, time, consumption
 
 #generation function
 def Generation(consumption, c, time, spike):
-    if (time == 700): return consumption + c + spike
-    if (time == 800): return consumption + c - spike
+    if (time == 70): return consumption + c + spike
+    if (time == 80): return consumption + c - spike
     return consumption + c#+ int(np.random.uniform(0, 1) < 0.02) * np.random.uniform(-10,10)
 # + 2 * np.random.uniform(-1,1) +
 #market clearing
@@ -51,29 +51,51 @@ def ForecastPercentage(beta, c, r, prices, aversion, cost, n, time, consumption,
 
 #characteristics for aggregate
 if (__name__ == '__main__'):
-    r = 0.02
-    prices = np.array([0])
+    r = 0.05
+    prices = np.array([2, -2])
+    prices2 = prices
     belief = np.array([0.5])
     bCap = 100
     aversion = 2
     volatility = 3
     consumption = 40
-    time = 5000
-    n = 1000
-    store = np.array([bCap / 2])
-    beta = 3
-    eta = 0.5
-    cost = 0.1
+    time = 100
+    n = 100
+
+    beta = 0.03
+    eta = 0.1
+    cost = 2
+    beliefAvg = []
+    storage = []
     variances = []
+    derivatives = []
     c = 2 * np.sin(np.linspace(1, time/12, time))
-    spike = 30
+    distrubance = 0.01
+    # spike = 20
 
     #loop over time
-    # for cost in np.arange(0.0025, 0.035, 0.002):
-    for i in range(time):
-        newPrice, delta = MarketClearing(i, c[i], r, prices, store[-1], belief[-1], bCap, aversion, volatility, consumption, n, spike)
+    for spike in np.arange(0, 50, 0.5):
+        store = np.array([bCap / 2])
+        for i in range(time):
+            newPrice, delta = MarketClearing(i, c[i], r, prices, store[-1], belief[-1], bCap, aversion, volatility, consumption, n, spike)
+            prices2[-1] = prices[-1] + distrubance
+            newPrice2, delta2 = MarketClearing(i, c[i], r, prices2, store[-1], belief[-1], bCap, aversion, volatility, consumption, n, spike)
 
-        prices = np.append(prices, newPrice)
-        store = np.append(store, store[-1] + delta)
-        belief = np.append(belief, ForecastPercentage(beta, c[i], r, prices, aversion, cost, n, time, consumption, belief, eta, store[-1], bCap, spike))
-        variances = np.append(variances, np.var(prices))
+            prices = np.append(prices, newPrice)
+            prices2 = np.append(prices2, newPrice2)
+            store = np.append(store, store[-1] + delta)
+            belief = np.append(belief, ForecastPercentage(beta, c[i], r, prices, aversion, cost, n, time, consumption, belief, eta, store[-1], bCap, spike))
+            variances = np.append(variances, np.var(prices))
+
+        beliefAvg = np.append(beliefAvg, np.mean(belief[-time:]))
+        variances = np.append(variances, np.var(prices[-time:]))
+        storage = np.append(storage, store[-time:])
+        derivative = np.log(abs((prices2[-time:] - prices[-time:])/distrubance))
+        # derivative = derivative[derivative >= -1E308]
+        derivatives = np.append(derivatives, np.mean(derivative))
+    # plt.plot(derivatives)
+    # # plt.yscale('log')
+    # plt.xlabel('Spike Size')
+    # plt.ylabel('LPE')
+    # plt.tight_layout()
+    # plt.show()

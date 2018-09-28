@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.optimize as sc
 import math
+from PIL import Image
 
 #market participant
 def participant(optionality, r, beta, forecastPrice, prices, stored, opinion, bCap, aversions, volatilities, consumption, generation, n):
@@ -97,8 +98,8 @@ def generation(generationMat, mean, i):
 # -------MAIN-----------
 #generate initial prices
 #per participant
-variances = []
-for k in range(1, 101, 100):
+values = []
+for k in range(1, 101, 1):
     n = 100
     time = 100
     prob1 = 0.3
@@ -128,7 +129,7 @@ for k in range(1, 101, 100):
             consumptionTemp = np.append(consumptionTemp, consumption)
             deltaStoreTemp = np.append(deltaStoreTemp, deltaStore)
             settingTemp = np.append(settingTemp, setting)
-            print(deltaStoreTemp)
+
             #concatenate temp arrays to full one
         beliefs = np.c_[beliefs, settingTemp]
         storage = np.c_[storage, deltaStoreTemp]
@@ -143,16 +144,22 @@ for k in range(1, 101, 100):
         percentage.append(percent)
         totalStorage.append(np.sum(storage[:,k]))
 
-    variances = np.append(variances, np.var(prices))
+    values.append(np.unique(np.floor(prices)))
 
+imgx = 5000
+imgy =  100
+increment = 1
+count = 0
+array = np.asarray(values)
+min = np.min(array[0])
+max = np.max(array[0])
+array = array - min
 
-# plt.figure()
-# plt.subplot(211)
-# plt.plot(prices)
-#
-# plt.subplot(212)
-# plt.plot(percentage)
-#
-# # plt.subplot(212)
-# # plt.plot(totalStorage)
-# plt.show()
+imgx = imgy / increment - 1
+imgy = max - min + 1
+image = Image.new("RGB", (int(imgx), int(imgy)))
+
+for i in range(int(imgx)):
+    for j in array[i]:
+        image.putpixel((i, int(j)), (255, 255, 255))
+image.show()

@@ -3,8 +3,8 @@ import scipy as sc
 import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 
-def prices(gen, cons, fut, n, n1, r, V, b, a):
-    fund = (2 * a * V * (fut - gen + cons)) / (n * r)
+def prices(gen, cons, fut, n, n1, r, V, b, a, t):
+    fund = (2 * a * V * ( 12 * np.sin(t / 12) - gen + cons)) / (n * r)
     return ((gen - cons - fut) * 2 * a * V - n1 * fund - (1 - n1) * fund + (1 - n1) * b * fund) / ((1 - n1) * b - (1 + r))
 
 def opinions(n, a, V, fut, gen, cons, r, cost, eta, beta, price, beliefs):
@@ -13,11 +13,12 @@ def opinions(n, a, V, fut, gen, cons, r, cost, eta, beta, price, beliefs):
     pi2 = - (fund + b * (price[-1] - fund))
     return eta * 1 / (1 + np.exp(beta * pi2 - beta * pi1) ) + (1 - eta) * beliefs[-1]
 
-    
+def storage(t):
+    return - np.cos(t / 12)
 
 if (__name__ == '__main__'):
     fut = 0
-    cons = 40.1
+    cons = 40
     gen = 40
     a = 10
     V = 3
@@ -30,12 +31,12 @@ if (__name__ == '__main__'):
     cost = 0
     time = 1000
 
-    startP = -50
-    endP = 50
+    startP = -5000
+    endP = 5000
     tickP = 30
-    startO = 0
-    endO = 1
-    tickO = 30
+    startO = -20
+    endO = 20
+    tickO = 10
 
 
     # first comes the beliefs calculation then the prices
@@ -46,12 +47,14 @@ if (__name__ == '__main__'):
     # dP = [price[i + 1] - price[i] for i in range(len(price) - 1)]
     # dB = [beliefs[i + 1] - beliefs[i] for i in range(len(beliefs) - 1)]
     def f(Y, t):
-        y1, y2 = Y
+        y1, tick = Y
+        y2 = 0.53
         price = np.array([y1])
         beliefs = np.array([y2])
         beliefNext = opinions(n, a, V, fut, gen, cons, r, cost, eta, beta, price, beliefs)
-        priceNext = prices(gen, cons, fut, n, n1, r, V, b, a)
-        return [(priceNext - price[-1])/((endP - startP) / tickP), (beliefNext - beliefs[-1]) / ((endO - startO) / tickO) ]
+        priceNext = prices(gen, cons, fut, n, n1, r, V, b, a, tick)
+        storageNext = storage(tick)
+        return [(priceNext - price[-1])/((endP - startP) / tickP), storageNext ]
 
     y1 = np.linspace(startP, endP, tickP)
     y2 = np.linspace(startO, endO, tickO)

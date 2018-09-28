@@ -34,7 +34,7 @@ def Optimize(prices, prices2, storage, lm, type, numSim, bCap, time, i, r, start
         return -solutions, dv
 
 length = 1000
-bCap = 100
+bCap = 100000
 startVol = 0
 r = 0.02 / 10
 # batteryPrices = np.zeros([100, 2])
@@ -44,12 +44,13 @@ startVol = 50
 endVol = bCap / 2
 batteryMat = np.zeros([21])
 
-for i in range(-500, 3001, 50):
+for i in range(-100, 101, 50):
     prices = genfromtxt('prices' + str(i) + '.csv', delimiter=",")
     temp = []
-
-    for startVol in range(0, bCap + 1, 5):
+    print(i)
+    for startVol in range(0, bCap + 1, 5000):
         # first part
+        print(startVol)
         solution, dv = Optimize(prices[:, -1], "NA", np.ones([length, 1]) * endVol, "NA", 1, length, bCap, 10, 10, r, startVol)
         s = np.ones([length, 1]).T * endVol
         storage = np.ones([length, 1]).T * endVol - dv
@@ -57,7 +58,7 @@ for i in range(-500, 3001, 50):
         model = sk.Ridge(fit_intercept=True, alpha = 0.1)
         lm = model.fit(np.array([prices[:,-1].reshape([length]), np.ones([length, 1]).reshape([length]) * endVol]).T, np.zeros([length,1]).reshape([length]))
         lm2 = model.fit(np.array([prices[:,-1].reshape([length]), np.ones([length, 1]).reshape([length]) * endVol]).T, solution.reshape([length]))
-
+        print("done")
         solution2, dv2 = Optimize(prices[:, -2], prices[:, -1], storage[0], lm2, 0, length, bCap, 10, 9, r, startVol)
         s2 = storage
         storage = storage[0] - dv2
@@ -102,6 +103,7 @@ for i in range(-500, 3001, 50):
         dv10 = startVol - storage
 
         finalPrice = np.mean(solution10)
+
         # batteryPrices[counter] = np.array([finalPrice, startVol])
 
         # # second part

@@ -62,11 +62,11 @@ if (__name__ == '__main__'):
     volatility = 3
     consumption = 40
     time = 100
-    n = 100
+    # n = 100
 
     beta = 0.03
     eta = 0.1
-    # cost = 2
+    cost = 2
     beliefAvg = []
     storage = []
     variances = []
@@ -75,7 +75,7 @@ if (__name__ == '__main__'):
     distrubance = 0.01
 
     #loop over time
-    for cost in np.arange(0, 50, 0.5):
+    for n in np.arange(1, 1000, 10):
         store = np.array([bCap / 2])
         for i in range(time):
             newPrice, delta = MarketClearing(i, c[i], r, prices, store[-1], belief[-1], bCap, aversion, volatility, consumption, n)
@@ -86,6 +86,7 @@ if (__name__ == '__main__'):
             prices2 = np.append(prices2, newPrice2)
             store = np.append(store, store[-1] + delta)
             belief = np.append(belief, ForecastPercentage(beta, c[i], r, prices, aversion, cost, n, time, consumption, belief, eta))
+        print("the max prices: ", np.max(prices[-time:]), " the min price: ", np.min(prices[-time:]))
 
         beliefAvg = np.append(beliefAvg, np.mean(belief[-time:]))
         variances = np.append(variances, np.var(prices[-time:]))
@@ -95,7 +96,7 @@ if (__name__ == '__main__'):
         derivatives = np.append(derivatives, np.mean(derivative))
     # plt.plot(derivatives)
     # # plt.yscale('log')
-    # plt.xlabel('cost')
+    # plt.xlabel('Number of Households')
     # plt.ylabel('LPE')
     # plt.tight_layout()
     # plt.show()
