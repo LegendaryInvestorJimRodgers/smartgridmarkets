@@ -28,7 +28,7 @@ def GetForecast(c, r, prices, belief, aversion, n, volatility, time, consumption
     if (belief == 1):
         return fundamentalPrice
     else:
-        return fundamentalPrice + 1.02 * (prices[-2] - fundamentalPrice)
+        return fundamentalPrice + 1.03 * (prices[-2] - fundamentalPrice)
 
 #generation function
 def Generation(consumption, c, time, spike):
@@ -54,24 +54,24 @@ def ForecastPercentage(beta, c, r, prices, aversion, cost, n, time, consumption,
 #characteristics for aggregate
 if (__name__ == '__main__'):
     r = 0.05
-    prices = np.array([2, -2])
+    prices = np.array([0, 0])
     prices2 = prices
     belief = np.array([0.5])
-    bCap = 100
+    bCap = 50000
     aversion = 2
     volatility = 3
-    consumption = 40
+    consumption = 20000
     time = 100
     n = 100
 
     beta = 0.03
     eta = 0.1
-    cost = 10
+    cost = 2
     beliefAvg = []
     storage = []
     variances = []
     derivatives = []
-    c = 2 * np.sin(np.linspace(1, time/12, time))
+    c = 200 * np.sin(np.linspace(1, time/12, time))
     distrubance = 0.01
     # spike = 20
 

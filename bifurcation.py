@@ -29,13 +29,16 @@ def GetForecast(c, r, prices, belief, aversion, n, volatility, time, consumption
     if (belief == 1):
         return fundamentalPrice
     else:
-        return fundamentalPrice + 1.01 * (prices[-2] - fundamentalPrice)
+        return fundamentalPrice + 1.03 * (prices[-2] - fundamentalPrice)
 
 #generation function
 def Generation(consumption, c, time):
-    if (time == 70): return consumption + c + 20
-    if (time == 80): return consumption + c - 20
-    else: return consumption + c #+ 2 * np.random.uniform(-1,1)
+    if (time == 30):
+        return consumption + c + 20000
+    elif (time == 80):
+        return consumption + c - 20000
+    else:
+        return consumption + c #+ 2 * np.random.uniform(-1,1)
 
 #market clearing
 def MarketClearing(time, c, r, prices, stored, belief, bCap, aversion, volatility, consumption, n):
@@ -57,10 +60,10 @@ if (__name__ == '__main__'):
     r = 0.05
     # prices = np.array([2, -2])
     belief = np.array([0.5])
-    bCap = 100
+    bCap = 50000
     aversion = 2
     volatility = 3
-    consumption = 40
+    consumption = 20000
     time = 100
     n = 100
     store = np.array([bCap / 2])
@@ -68,14 +71,14 @@ if (__name__ == '__main__'):
     eta = 0.1
     # cost = 2
     variances = []
-    c = 2 * np.sin(np.linspace(1, time/12, time))
+    c = 2000 * np.sin(np.linspace(1, time/12, time))
     values = []
     imgx = 525
     imgy =  70
-    increment = 1
+    increment = 0.1
     #loop over time
-    for cost in np.arange(1, imgy, increment):
-        prices = np.array([2, -2])
+    for cost in np.arange(0, imgy, increment):
+        prices = np.array([0, 0])
         for i in range(time):
             newPrice, delta = MarketClearing(i, c[i], r, prices, store[-1], belief[-1], bCap, aversion, volatility, consumption, n)
 
@@ -83,8 +86,7 @@ if (__name__ == '__main__'):
             store = np.append(store, store[-1] + delta)
             belief = np.append(belief, ForecastPercentage(beta, c[i], r, prices, aversion, cost, n, time, consumption, belief, eta))
             # variances = np.append(variances, np.var(prices))
-
-        values.append(np.unique(np.floor(prices)))
+        values.append(np.unique(np.floor(prices/1000)))
 
     count = 0
     array = np.asarray(values)

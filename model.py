@@ -128,7 +128,7 @@ for k in range(1, 101, 100):
             consumptionTemp = np.append(consumptionTemp, consumption)
             deltaStoreTemp = np.append(deltaStoreTemp, deltaStore)
             settingTemp = np.append(settingTemp, setting)
-            print(deltaStoreTemp)
+
             #concatenate temp arrays to full one
         beliefs = np.c_[beliefs, settingTemp]
         storage = np.c_[storage, deltaStoreTemp]

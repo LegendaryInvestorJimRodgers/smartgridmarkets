@@ -11,7 +11,7 @@ def DemandCurve(time, c, r, prices, stored, belief, bCap, aversion, volatility, 
     #find the individual demands for different forecasts
     forecast = belief * forecastPrice1 + (1 - belief) * forecastPrice2
 
-    aggregateDemand = consumption + c + ( forecast - (1 + r) * prices[-1]) / (2 * aversion * volatility)
+    aggregateDemand = consumption + c + n * ( forecast - (1 + r) * prices[-1]) / (2 * aversion * volatility)
 
     #check the constraints for charging
     # if(aggregateDemand + stored - consumption > bCap):
@@ -28,12 +28,12 @@ def GetForecast(c, r, prices, belief, aversion, n, volatility, time, consumption
     if (belief == 1):
         return fundamentalPrice
     else:
-        return fundamentalPrice + 1.01 * (prices[-2] - fundamentalPrice)
+        return fundamentalPrice + 1.03 * (prices[-2] - fundamentalPrice)
 
 #generation function
 def Generation(consumption, c, time):
-    if (time == 70): return consumption + c + 20
-    if (time == 80): return consumption + c - 20
+    if (time == 70): return consumption + c + 20000
+    if (time == 80): return consumption + c - 20000
     else: return consumption + c #+ 2 * np.random.uniform(-1,1)
 
 #market clearing
@@ -54,13 +54,13 @@ def ForecastPercentage(beta, c, r, prices, aversion, cost, n, time, consumption,
 #characteristics for aggregate
 if (__name__ == '__main__'):
     r = 0.05
-    prices = np.array([2, -2])
+    prices = np.array([0, 0])
     prices2 = prices
     belief = np.array([0.5])
-    bCap = 100
+    bCap = 50000
     aversion = 2
     volatility = 3
-    consumption = 40
+    consumption = 20000
     time = 100
     # n = 100
 
@@ -71,7 +71,7 @@ if (__name__ == '__main__'):
     storage = []
     variances = []
     derivatives = []
-    c = 2 * np.sin(np.linspace(1, time/12, time))
+    c = 200 * np.sin(np.linspace(1, time/12, time))
     distrubance = 0.01
 
     #loop over time
@@ -86,7 +86,6 @@ if (__name__ == '__main__'):
             prices2 = np.append(prices2, newPrice2)
             store = np.append(store, store[-1] + delta)
             belief = np.append(belief, ForecastPercentage(beta, c[i], r, prices, aversion, cost, n, time, consumption, belief, eta))
-        print("the max prices: ", np.max(prices[-time:]), " the min price: ", np.min(prices[-time:]))
 
         beliefAvg = np.append(beliefAvg, np.mean(belief[-time:]))
         variances = np.append(variances, np.var(prices[-time:]))

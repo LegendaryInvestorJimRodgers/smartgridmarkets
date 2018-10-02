@@ -22,7 +22,7 @@ def participant(optionality, r, beta, forecastPrice, prices, stored, opinion, bC
 
     ruleOneProb = forecastType(optionality, r, beta, prices, consumption, generation, n)
 
-    if ( ruleOneProb > np.random.uniform(0, 1)):
+    if ( ruleOneProb > 0.5):
         opinion = 1
     else:
         opinion = 2
@@ -76,7 +76,7 @@ def GenerateCharacteristics(n, bCap, aversions, volatilty, consumptions, capacit
             consumptionsMat[i] = consumptions[np.random.randint(0, len(consumptions))]
             storages[i] =  bCapMat[i] / 2 #change initial storage here
 
-            if (np.random.uniform(0, 1) < prob1):
+            if (0.5 < prob1):
                 beliefs[i] = 1
             else:
                 beliefs[i] = 2
@@ -89,9 +89,9 @@ def GenerateCharacteristics(n, bCap, aversions, volatilty, consumptions, capacit
 def generation(generationMat, mean, i):
     # if(np.random.uniform(0, 1) < 0.01):
     if(i == 70):
-        return mean + 200# + 200 * np.random.normal(0, 10) # + 0.2  * np.sin(len(generationMat) / 365)
+        return mean + 20000# + 200 * np.random.normal(0, 10) # + 0.2  * np.sin(len(generationMat) / 365)
     elif(i == 50):
-        return mean - 200
+        return mean - 20000
     else:
         return mean #+ 0.2 * np.sin(len(generationMat) / 365)
 
@@ -99,17 +99,18 @@ def generation(generationMat, mean, i):
 #generate initial prices
 #per participant
 values = []
+variances = []
 for k in range(1, 101, 1):
     n = 100
     time = 100
     prob1 = 0.3
     capacities = np.array([400, 250])
     aversion = np.array([2])
-    consumption = np.array([40])
+    consumption = np.array([20])
     volatility = np.array([3])
     beta = 0.03
     optionality = 2
-    r = 0.02
+    r = 0.05
     percentage = []
     totalStorage = []
     prices = np.ones([2, 1]) * 0
@@ -144,9 +145,10 @@ for k in range(1, 101, 1):
         percentage.append(percent)
         totalStorage.append(np.sum(storage[:,k]))
 
-    values.append(np.unique(np.floor(prices)))
+    values.append(np.unique(np.floor(prices/ 500)))
+    variances = np.append(variances, np.var(prices))
 
-imgx = 5000
+imgx = 610
 imgy =  100
 increment = 1
 count = 0

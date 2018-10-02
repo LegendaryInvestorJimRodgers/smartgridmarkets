@@ -11,7 +11,7 @@ def DemandCurve(time, c, r, prices, stored, belief, bCap, aversion, volatility, 
     #find the individual demands for different forecasts
     forecast = belief * forecastPrice1 + (1 - belief) * forecastPrice2
 
-    aggregateDemand = consumption + c + ( forecast - (1 + r) * prices[-1]) / (2 * aversion * volatility)
+    aggregateDemand = consumption + c +  ( forecast - (1 + r) * prices[-1]) / (2 * aversion * volatility)
 
     #check the constraints for charging
     # if(aggregateDemand + stored - consumption > bCap):
@@ -28,13 +28,13 @@ def GetForecast(c, r, prices, belief, aversion, n, volatility, time, consumption
     if (belief == 1):
         return fundamentalPrice
     else:
-        return fundamentalPrice + 1.01 * (prices[-2] - fundamentalPrice)
+        return fundamentalPrice + 1.03 * (prices[-2] - fundamentalPrice)
 
 #generation function
 def Generation(consumption, c, time):
-    if (time == 70): return consumption + c + 20
-    if (time == 80): return consumption + c - 20
-    else: return consumption + c #+ 2 * np.random.uniform(-1,1)
+    if (time == 70): return consumption + c + 20000
+    if (time == 80): return consumption + c - 20000
+    else: return consumption + c
 
 #market clearing
 def MarketClearing(time, c, r, prices, stored, belief, bCap, aversion, volatility, consumption, n):
@@ -54,13 +54,13 @@ def ForecastPercentage(beta, c, r, prices, aversion, cost, n, time, consumption,
 #characteristics for aggregate
 if (__name__ == '__main__'):
     r = 0.05
-    prices = np.array([2, -2])
+    prices = np.array([0, 0])
     prices2 = prices
     belief = np.array([0.5])
-    bCap = 100
+    bCap = 50000
     aversion = 2
     volatility = 3
-    consumption = 40
+    consumption = 20000
     time = 100
     n = 100
 
@@ -71,11 +71,11 @@ if (__name__ == '__main__'):
     storage = []
     variances = []
     derivatives = []
-    c = 2 * np.sin(np.linspace(1, time/12, time))
+    c = 200 * np.sin(np.linspace(1, time/12, time))
     distrubance = 0.01
 
     #loop over time
-    for cost in np.arange(0, 50, 0.5):
+    for cost in np.arange(0, 50, 1):
         store = np.array([bCap / 2])
         for i in range(time):
             newPrice, delta = MarketClearing(i, c[i], r, prices, store[-1], belief[-1], bCap, aversion, volatility, consumption, n)
@@ -93,6 +93,7 @@ if (__name__ == '__main__'):
         derivative = np.log(abs((prices2[-time:] - prices[-time:])/distrubance))
         # derivative = derivative[derivative >= -1E308]
         derivatives = np.append(derivatives, np.mean(derivative))
+    print(beliefAvg)
     # plt.plot(derivatives)
     # # plt.yscale('log')
     # plt.xlabel('cost')

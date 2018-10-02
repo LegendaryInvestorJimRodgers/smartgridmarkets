@@ -66,9 +66,9 @@ if (__name__ == '__main__'):
     variances = []
     c = 2 * np.sin(np.linspace(1, time/12, time))
     values = []
-    imgx = 6000
-    imgy =  70
-    increment = 1
+    imgx = 640
+    imgy =  50
+    increment = 0.1
     spike = 20
     #loop over time
     for n in np.arange(1, imgy, increment):
@@ -82,7 +82,7 @@ if (__name__ == '__main__'):
             belief = np.append(belief, ForecastPercentage(beta, c[i], r, prices, aversion, cost, n, time, consumption, belief, eta, store[-1], bCap, spike))
             # variances = np.append(variances, np.var(prices))
 
-        values.append(np.unique(np.floor(prices)))
+        values.append(np.unique(np.floor(prices/10)))
 
     count = 0
     array = np.asarray(values)

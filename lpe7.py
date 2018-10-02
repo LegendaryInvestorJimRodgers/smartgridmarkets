@@ -52,13 +52,13 @@ def ForecastPercentage(beta, c, r, prices, aversion, cost, n, time, consumption,
 #characteristics for aggregate
 if (__name__ == '__main__'):
     r = 0.05
-    prices = np.array([2, -2])
+    prices = np.array([0, 0])
     prices2 = prices
     belief = np.array([0.5])
-    bCap = 100
+    bCap = 50000
     aversion = 2
     volatility = 3
-    consumption = 40
+    consumption = 20000
     time = 100
     # n = 100
 
@@ -69,12 +69,12 @@ if (__name__ == '__main__'):
     storage = []
     variances = []
     derivatives = []
-    c = 2 * np.sin(np.linspace(1, time/12, time))
+    c = 200 * np.sin(np.linspace(time/2, time/12, time))
     distrubance = 0.01
-    spike = 20
+    spike = 20000
 
     #loop over time
-    for n in np.arange(0, 50, 0.5):
+    for n in np.arange(1, 1000, 10):
         store = np.array([bCap / 2])
         for i in range(time):
             newPrice, delta = MarketClearing(i, c[i], r, prices, store[-1], belief[-1], bCap, aversion, volatility, consumption, n, spike)
@@ -85,7 +85,7 @@ if (__name__ == '__main__'):
             prices2 = np.append(prices2, newPrice2)
             store = np.append(store, store[-1] + delta)
             belief = np.append(belief, ForecastPercentage(beta, c[i], r, prices, aversion, cost, n, time, consumption, belief, eta, store[-1], bCap, spike))
-            variances = np.append(variances, np.var(prices))
+        variances = np.append(variances, np.var(prices))
 
         beliefAvg = np.append(beliefAvg, np.mean(belief[-time:]))
         variances = np.append(variances, np.var(prices[-time:]))

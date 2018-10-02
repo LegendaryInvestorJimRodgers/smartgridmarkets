@@ -7,7 +7,7 @@ from PIL import Image
 def DemandCurve(time, c, r, prices, stored, belief, bCap, aversion, volatility, consumption, n, spike):
     #get the forecasts first
     push = 5
-    gamma = 0.003
+    gamma = 0.001
     forecastPrice1 = GetForecast(c, r, prices, 1,  aversion, n, volatility, time, consumption, stored, bCap, spike)
     forecastPrice2 = GetForecast(c, r, prices, 2,  aversion, n, volatility, time, consumption, stored, bCap, spike)
 
@@ -21,7 +21,7 @@ def DemandCurve(time, c, r, prices, stored, belief, bCap, aversion, volatility, 
 #generation function
 def GetForecast(c, r, prices, belief, aversion, n, volatility, time, consumption, stored, bCap, spike):
     push = 5
-    gamma = 0.003
+    gamma = 0.001
     fundamentalPrice = ((2 * aversion * volatility + gamma) * (c - Generation(consumption, c, time, spike) + consumption) + gamma * (bCap / 2 - stored)) / (n * r - gamma * push)
 
     if (belief == 1):
@@ -57,10 +57,10 @@ if (__name__ == '__main__'):
     r = 0.05
 
     belief = np.array([0.5])
-    bCap = 100
+    bCap = 50000
     aversion = 2
     volatility = 3
-    consumption = 40
+    consumption = 20000
     time = 100
     n = 100
     store = np.array([bCap / 2])
@@ -68,12 +68,12 @@ if (__name__ == '__main__'):
     eta = 0.1
     # cost = 2
     variances = []
-    c = 2 * np.sin(np.linspace(1, time/12, time))
+    c = 200 * np.sin(np.linspace(time/2, time/12, time))
     values = []
     imgx = 1000
-    imgy =  70
+    imgy =  50
     increment = 1
-    spike = 20
+    spike = 20000
     #loop over time
     for cost in np.arange(1, imgy, increment):
         prices = np.array([0, 0])
