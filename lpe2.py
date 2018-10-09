@@ -34,7 +34,7 @@ def GetForecast(c, r, prices, belief, aversion, n, volatility, time, consumption
 def Generation(consumption, c, time):
     if (time == 70): return consumption + c + 20000
     if (time == 80): return consumption + c - 20000
-    else: return consumption + c
+    else: return consumption + c#* np.random.normal(0, 3)
 
 #market clearing
 def MarketClearing(time, c, r, prices, stored, belief, bCap, aversion, volatility, consumption, n):
@@ -78,6 +78,7 @@ if (__name__ == '__main__'):
     for cost in np.arange(0, 50, 1):
         store = np.array([bCap / 2])
         for i in range(time):
+            np.random.seed(seed=1234)
             newPrice, delta = MarketClearing(i, c[i], r, prices, store[-1], belief[-1], bCap, aversion, volatility, consumption, n)
             prices2[-1] = prices[-1] + distrubance
             newPrice2, delta2 = MarketClearing(i, c[i], r, prices2, store[-1], belief[-1], bCap, aversion, volatility, consumption, n)
@@ -94,9 +95,9 @@ if (__name__ == '__main__'):
         # derivative = derivative[derivative >= -1E308]
         derivatives = np.append(derivatives, np.mean(derivative))
     print(beliefAvg)
-    # plt.plot(derivatives)
-    # # plt.yscale('log')
-    # plt.xlabel('cost')
-    # plt.ylabel('LPE')
-    # plt.tight_layout()
-    # plt.show()
+    plt.plot(derivatives)
+    # plt.yscale('log')
+    plt.xlabel('cost')
+    plt.ylabel('LPE')
+    plt.tight_layout()
+    plt.show()
