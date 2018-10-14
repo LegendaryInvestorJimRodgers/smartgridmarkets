@@ -26,13 +26,13 @@ def GetForecast(c, r, prices, belief, aversion, n, volatility, time, consumption
     if (belief == 1):
         return fundamentalPrice
     else:
-        return fundamentalPrice - 1.03 * (prices[-2] - fundamentalPrice)
+        return fundamentalPrice + 1.03 * (prices[-2] - fundamentalPrice)
 
 #generation function
 def Generation(consumption, c, time, spike):
     # if (time == 70): return consumption + c + spike
     # if (time == 80): return consumption + c - spike
-    return consumption + c * np.random.normal(0,10)
+    return consumption + c #* np.random.normal(0,10)
 # + 2 * np.random.uniform(-1,1) +
 #market clearing
 def MarketClearing(time, c, r, prices, stored, belief, bCap, aversion, volatility, consumption, n, spike):
@@ -74,7 +74,7 @@ if (__name__ == '__main__'):
     spike = 0
 
     #loop over time
-    for cost in np.arange(0, 50, 1):
+    for cost in np.arange(1, 2, 1):
         store = np.array([bCap / 2])
         for i in range(time):
             newPrice, delta = MarketClearing(i, c[i], r, prices, store[-1], belief[-1], bCap, aversion, volatility, consumption, n, spike)

@@ -13,25 +13,25 @@ def opinions(n, a, V, fut, gen, cons, r, cost, eta, beta, price, beliefs):
     pi2 = - (fund + b * (price[-1] - fund))
     return eta * 1 / (1 + np.exp(beta * pi2 - beta * pi1) ) + (1 - eta) * beliefs[-1]
 
-    
+
 
 if (__name__ == '__main__'):
     fut = 0
-    cons = 40.1
+    cons = 40
     gen = 40
-    a = 10
+    a = 2
     V = 3
     n1 = 0.5
-    n = 10
+    n = 100
     r = 0.05
-    b = 1.12
-    beta = 0.5
-    eta = 0.5
-    cost = 0
+    b = 3
+    beta = 0.1
+    eta = 0.1
+    cost = 1
     time = 1000
 
-    startP = -50
-    endP = 50
+    startP = 0
+    endP = 5
     tickP = 30
     startO = 0
     endO = 1
@@ -80,8 +80,8 @@ if (__name__ == '__main__'):
         y0 = [5, y20]
         ys = odeint(f, y0, tspan)
         plt.plot(ys[:, 0], ys[:, 1], 'b-')  # path
-        plt.plot([ys[0, 0]], [ys[0, 1]], 'o')  # start
-        plt.plot([ys[-1, 0]], [ys[-1, 1]], 's')  # end
+        plt.plot([ys[-1, 1]], [ys[-1, 1]], 'o')  # start
+        plt.plot([ys[-1, 1]], [ys[-1, 1]], 's')  # end
 
     plt.xlim([-startP, endP])
     plt.xlabel('Price')
