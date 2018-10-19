@@ -34,7 +34,7 @@ def GetForecast(c, r, prices, belief, aversion, n, volatility, time, consumption
 def Generation(consumption, c, time):
     if (time == 700): return consumption + c #+ 20000
     if (time == 800): return consumption + c #- 20000
-    else: return consumption + c * np.random.normal(1, .1)
+    else: return consumption + c #* np.random.normal(1, .1)
 
 #market clearing
 def MarketClearing(time, c, r, prices, stored, belief, bCap, aversion, volatility, consumption, n):
@@ -64,7 +64,7 @@ if (__name__ == '__main__'):
     time = 5000
     n = 100
 
-    beta = 0.25
+    beta = 0.80
     eta = 0.1
     # cost = 2
     beliefAvg = []
@@ -101,4 +101,6 @@ if (__name__ == '__main__'):
     # plt.tight_layout()
     # plt.show()
     plt.scatter(prices[1001:-1], belief[1000:-1])
+    plt.xlabel('prices')
+    plt.ylabel('beliefs')
     plt.show()

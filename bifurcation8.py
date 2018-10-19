@@ -98,9 +98,9 @@ def generation(generationMat, mean, i):
     # c = 2 * np.sin(i / 8)
     c= 0
     if(i == 70):
-        return mean + c + 200# + 200 * np.random.normal(0, 10) # + 0.2  * np.sin(len(generationMat) / 365)
+        return mean + c + 20000# + 200 * np.random.normal(0, 10) # + 0.2  * np.sin(len(generationMat) / 365)
     elif(i == 50):
-        return mean + c - 200
+        return mean + c - 20000
     else:
         return mean + c #+ 0.2 * np.sin(len(generationMat) / 365)
 
@@ -109,7 +109,7 @@ def generation(generationMat, mean, i):
 #per participant
 variances = []
 values = []
-for k in range(1, 101, 5):
+for k in range(1, 101, 1):
     n = 100
     time = 100
     prob1 = 0.3
@@ -152,16 +152,16 @@ for k in range(1, 101, 5):
         prices = np.append(prices, newPrice)
 
     print(np.var(prices))
+    variances = np.append(variances, np.var(prices))
     for k in range(time):
         percent = (beliefs[:, k] == 1).sum() / len(beliefs[:, 0])
         percentage.append(percent)
         totalStorage.append(np.sum(storage[:,k]))
 
-    variances = np.append(variances, np.var(prices))
     values.append(np.unique(np.floor(prices)))
 
-imgx = 2600
-imgy =  20
+imgx = 601
+imgy =  100
 increment = 1
 count = 0
 array = np.asarray(values)
@@ -172,6 +172,7 @@ array = array - min
 imgx = imgy / increment - 1
 imgy = max - min + 1
 image = Image.new("RGB", (int(imgx), int(imgy)))
+array = array[1:]
 
 for i in range(int(imgx)):
     for j in array[i]:
