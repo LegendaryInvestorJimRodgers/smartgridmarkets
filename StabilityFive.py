@@ -71,8 +71,8 @@ def main(beta, r):
     prices = np.array([-1, 1])
     prices2 = prices
     belief1 = np.array([1/4])
-    belief2 = np.array([0/5])
-    belief3 = np.array([1/4])
+    belief2 = np.array([1/4])
+    belief3 = np.array([0/4])
     belief4 = np.array([1/4])
     belief5 = np.array([1/4])
     bCap = 50000
@@ -131,7 +131,7 @@ if (__name__ == '__main__'):
     values = []
     # counter, prices, belief = main(beta, r)
 
-    for r in np.arange(0.001, 0.3, 0.05):
+    for r in np.arange(0.001, 1, 0.1):
         temp = []
         for beta in np.arange(70, 90, 4):
             try:
@@ -143,7 +143,7 @@ if (__name__ == '__main__'):
                 temp = np.append(temp, np.inf)
                 continue
         values.append(temp)
-    plt.imshow(values, interpolation='none', extent=[50, 80, 0.3, 0.001], aspect = 'auto')
+    plt.imshow(values, interpolation='none', extent=[70, 90, 1, 0.001], aspect = 'auto')
     plt.xlabel('beta')
     plt.ylabel('interest rate')
     plt.colorbar()

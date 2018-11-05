@@ -12,8 +12,8 @@ def DemandCurve(time, c, r, prices, stored, belief, bCap, aversion, volatility, 
 
     #find the individual demands for different forecasts
     forecast = belief * forecastPrice1 + (1 - belief) * forecastPrice2
-
-    aggregateDemand = consumption + c + (gamma * (bCap / 2 - stored - c + 20000) + forecast * (gamma * push + 1) - (1 + r) * prices[-1]) / (2 * aversion * volatility + gamma) #((bCap / 2 - stored - c + push * forecast) + 1000 *(forecast - (1 + r) * prices[-1])) / (2 * aversion * volatility + 1)
+    # - c + 20000
+    aggregateDemand = consumption + c + (gamma * (bCap / 2 - stored ) + forecast * (gamma * push + 1) - (1 + r) * prices[-1]) / (2 * aversion * volatility + gamma) #((bCap / 2 - stored - c + push * forecast) + 1000 *(forecast - (1 + r) * prices[-1])) / (2 * aversion * volatility + 1)
     # print(aggregateDemand)
     return aggregateDemand
 
@@ -21,7 +21,8 @@ def DemandCurve(time, c, r, prices, stored, belief, bCap, aversion, volatility, 
 def GetForecast(c, r, prices, belief, aversion, n, volatility, time, consumption, stored, bCap, spike):
     push = 5
     gamma = 0.0001
-    fundamentalPrice = ((2 * aversion * volatility + gamma) * (c - Generation(consumption, c, time, spike) + consumption) + gamma * (bCap / 2 - stored + 20000 - c)) / (n * r + gamma * push)
+    # + 20000 - c
+    fundamentalPrice = ((2 * aversion * volatility + gamma) * (c - Generation(consumption, c, time, spike) + consumption) + gamma * (bCap / 2 - stored )) / (n * r + gamma * push)
 
     if (belief == 1):
         return fundamentalPrice
@@ -30,8 +31,8 @@ def GetForecast(c, r, prices, belief, aversion, n, volatility, time, consumption
 
 #generation function
 def Generation(consumption, c, time, spike):
-    # if (time == 70): return consumption + c + spike
-    # if (time == 80): return consumption + c - spike
+    if (time == 70): return consumption + c + spike
+    if (time == 80): return consumption + c - spike
     return consumption + c #* np.random.normal(0,10)
 # + 2 * np.random.uniform(-1,1) +
 #market clearing
@@ -51,10 +52,10 @@ def ForecastPercentage(beta, c, r, prices, aversion, cost, n, time, consumption,
 
 #characteristics for aggregate
 if (__name__ == '__main__'):
-    r = 0.05
+    r = 0.06
     prices = np.array([0, 0])
     prices2 = prices
-    belief = np.array([0])
+    belief = np.array([0.5])
     bCap = 50000
     aversion = 2
     volatility = 3
@@ -62,19 +63,21 @@ if (__name__ == '__main__'):
     time = 100
     n = 100
 
-    beta = 0.003
+    beta = 0.03
     eta = 0.1
     # cost = 2
     beliefAvg = []
     storage = []
     variances = []
     derivatives = []
+    recoveryTime = []
+    spikeSize = []
     c = 200 * np.sin(np.linspace(time/2, time/12, time))
     distrubance = 0.01
-    spike = 0
+    spike = 20000
 
     #loop over time
-    for cost in np.arange(1, 2, 1):
+    for cost in np.arange(0, 50, 1):
         store = np.array([bCap / 2])
         for i in range(time):
             newPrice, delta = MarketClearing(i, c[i], r, prices, store[-1], belief[-1], bCap, aversion, volatility, consumption, n, spike)
@@ -93,9 +96,10 @@ if (__name__ == '__main__'):
         derivative = np.log(abs((prices2[-time:] - prices[-time:])/distrubance))
         # derivative = derivative[derivative >= -1E308]
         derivatives = np.append(derivatives, np.mean(derivative))
-    # plt.plot(derivatives)
-    # # plt.yscale('log')
-    # plt.xlabel('cost')
-    # plt.ylabel('LPE')
-    # plt.tight_layout()
-    # plt.show()
+        # recoveryTime = np.append(recoveryTime, np.where(abs(prices[(72 + time * cost):]) < 0.05)[0][0])
+        # spikeSize = np.append(spikeSize, np.max(abs(prices[(cost * time):])))
+    plt.plot(derivatives)
+    # plt.yscale('log')
+    plt.xlabel('cost')
+    plt.ylabel('LPE')
+    plt.show()

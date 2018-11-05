@@ -28,12 +28,12 @@ def GetForecast(c, r, prices, belief, aversion, n, volatility, time, consumption
     if (belief == 1):
         return fundamentalPrice
     else:
-        return fundamentalPrice - 5 * (prices[-2] - fundamentalPrice)
+        return fundamentalPrice + 1.03 * (prices[-2] - fundamentalPrice)
 
 #generation function
 def Generation(consumption, c, time):
-    if (time == 700): return consumption + c #+ 20000
-    if (time == 800): return consumption + c #- 20000
+    if (time == 70): return consumption + c + 20000
+    if (time == 80): return consumption + c - 20000
     else: return consumption + c #* np.random.normal(1, .1)
 
 #market clearing
@@ -54,28 +54,30 @@ def ForecastPercentage(beta, c, r, prices, aversion, cost, n, time, consumption,
 #characteristics for aggregate
 if (__name__ == '__main__'):
     r = 0.05
-    prices = np.array([-1, 1])
+    prices = np.array([0, 0])
     prices2 = prices
     belief = np.array([0.5])
     bCap = 50000
     aversion = 2
     volatility = 3
     consumption = 20000
-    time = 5000
+    time = 100
     n = 100
 
-    beta = 0.80
+    beta = 0.03
     eta = 0.1
     # cost = 2
     beliefAvg = []
     storage = []
     variances = []
     derivatives = []
+    recoveryTime = []
+    spikeSize = []
     c = 200 * np.sin(np.linspace(1, time/12, time))
     distrubance = 0.01
 
     #loop over time
-    for cost in np.arange(1, 2, 1):
+    for cost in np.arange(0, 50, 1):
         store = np.array([bCap / 2])
         for i in range(time):
             newPrice, delta = MarketClearing(i, c[i], r, prices, store[-1], belief[-1], bCap, aversion, volatility, consumption, n)
@@ -93,14 +95,16 @@ if (__name__ == '__main__'):
         derivative = np.log(abs((prices2[-time:] - prices[-time:])/distrubance))
         # derivative = derivative[derivative >= -1E308]
         derivatives = np.append(derivatives, np.mean(derivative))
+        # recoveryTime = np.append(recoveryTime, np.where(abs(prices[(72 + time * cost):]) < 1e-5)[0][0])
+        # spikeSize = np.append(spikeSize, np.max(abs(prices[(cost * time):])))
     print(beliefAvg)
-    # plt.plot(derivatives)
-    # # plt.yscale('log')
-    # plt.xlabel('cost')
-    # plt.ylabel('LPE')
-    # plt.tight_layout()
-    # plt.show()
-    plt.scatter(prices[1001:-1], belief[1000:-1])
-    plt.xlabel('prices')
-    plt.ylabel('beliefs')
+    plt.plot(derivatives)
+    # plt.yscale('log')
+    plt.xlabel('cost')
+    plt.ylabel('LPE')
+    plt.tight_layout()
     plt.show()
+    # plt.scatter(prices[1001:-1], belief[1000:-1])
+    # plt.xlabel('prices')
+    # plt.ylabel('beliefs')
+    # plt.show()
