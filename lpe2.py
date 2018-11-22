@@ -62,11 +62,11 @@ if (__name__ == '__main__'):
     volatility = 3
     consumption = 20000
     time = 100
-    n = 100
+    # n = 100
 
     beta = 0.03
     eta = 0.1
-    # cost = 2
+    cost = 2
     beliefAvg = []
     storage = []
     variances = []
@@ -77,7 +77,7 @@ if (__name__ == '__main__'):
     distrubance = 0.01
 
     #loop over time
-    for cost in np.arange(0, 50, 1):
+    for n in np.arange(1, 100, 1):
         store = np.array([bCap / 2])
         for i in range(time):
             newPrice, delta = MarketClearing(i, c[i], r, prices, store[-1], belief[-1], bCap, aversion, volatility, consumption, n)
@@ -98,7 +98,7 @@ if (__name__ == '__main__'):
         # recoveryTime = np.append(recoveryTime, np.where(abs(prices[(72 + time * cost):]) < 1e-5)[0][0])
         # spikeSize = np.append(spikeSize, np.max(abs(prices[(cost * time):])))
     print(beliefAvg)
-    plt.plot(derivatives)
+    plt.plot(variances)
     # plt.yscale('log')
     plt.xlabel('cost')
     plt.ylabel('LPE')

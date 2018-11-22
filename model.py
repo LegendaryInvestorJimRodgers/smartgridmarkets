@@ -113,7 +113,7 @@ for k in range(1, 101, 100):
     totalStorage = []
     prices = np.ones([2, 1]) * 0
     np.random.seed(seed = 1234)
-    k =
+    # k =
 
     capacities, aversion, volatility, consumptionMat, storage, beliefs = GenerateCharacteristics(n, capacities, aversion, volatility, consumption, capacities, prob1, 50000, k / 100)
     generationArray = np.array([np.sum(consumptionMat)])

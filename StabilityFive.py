@@ -30,9 +30,9 @@ def GetForecast(c, r, prices, setting, aversion, n, volatility, time, consumptio
     if (setting == 1):
         return fundamentalPrice
     elif(setting == 2):
-        return fundamentalPrice - 5 * (prices[-2] - fundamentalPrice)
+        return fundamentalPrice + 3 * (prices[-2] - fundamentalPrice)
     elif(setting == 3):
-        return fundamentalPrice - 5 * (prices[-2] - fundamentalPrice)
+        return fundamentalPrice - 3 * (prices[-2] - fundamentalPrice)
     elif(setting == 4):
         return fundamentalPrice + 20
     elif(setting == 5):
@@ -70,11 +70,11 @@ def main(beta, r):
     # r = 0.05
     prices = np.array([-1, 1])
     prices2 = prices
-    belief1 = np.array([1/4])
-    belief2 = np.array([1/4])
-    belief3 = np.array([0/4])
-    belief4 = np.array([1/4])
-    belief5 = np.array([1/4])
+    belief1 = np.array([1/5])
+    belief2 = np.array([1/5])
+    belief3 = np.array([1/5])
+    belief4 = np.array([1/5])
+    belief5 = np.array([1/5])
     bCap = 50000
     aversion = 2
     volatility = 3
@@ -84,7 +84,7 @@ def main(beta, r):
     movement = 5
     # beta = 0.03
     eta = 0.1
-    cost = 1
+    cost = 0
 
     beliefAvg = []
     storage = []
@@ -92,7 +92,7 @@ def main(beta, r):
     derivatives = []
     c = 200 * np.sin(np.linspace(1, time/12, time))
     distrubance = 0.01
-    spike = 0
+    spike = 20000
     start = 0
     store = np.array([bCap / 2])
     #loop over time
@@ -131,9 +131,9 @@ if (__name__ == '__main__'):
     values = []
     # counter, prices, belief = main(beta, r)
 
-    for r in np.arange(0.001, 1, 0.1):
+    for r in np.arange(0.001, 1, 0.04):
         temp = []
-        for beta in np.arange(70, 90, 4):
+        for beta in np.arange(50, 80, 4):
             try:
                 counter, prices, belief1, belief2, belief3, belief4, belief5 = main(beta, r)
                 temp = np.append(temp, counter)
@@ -143,7 +143,7 @@ if (__name__ == '__main__'):
                 temp = np.append(temp, np.inf)
                 continue
         values.append(temp)
-    plt.imshow(values, interpolation='none', extent=[70, 90, 1, 0.001], aspect = 'auto')
+    plt.imshow(values, interpolation='none', extent=[50, 80, 0.3, 0.001], aspect = 'auto')
     plt.xlabel('beta')
     plt.ylabel('interest rate')
     plt.colorbar()

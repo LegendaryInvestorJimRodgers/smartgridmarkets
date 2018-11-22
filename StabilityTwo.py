@@ -53,7 +53,7 @@ def ForecastPercentage(beta, c, r, prices, aversion, volatility, cost, n, time, 
 
 def main(beta, r, cost, eta):
     # r = 0.05
-    prices = np.array([0, 0])
+    prices = np.array([0, 1])
     prices2 = prices
     belief = np.array([0.5])
     bCap = 50000

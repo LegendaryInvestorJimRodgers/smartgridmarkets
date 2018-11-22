@@ -60,11 +60,11 @@ if (__name__ == '__main__'):
     volatility = 3
     consumption = 20000
     time = 100
-    # n = 100
+    n = 100
 
     beta = 0.03
     eta = 0.1
-    cost = 2
+    # cost = 2
     beliefAvg = []
     storage = []
     variances = []
@@ -74,7 +74,7 @@ if (__name__ == '__main__'):
     spike = 20000
 
     #loop over time
-    for n in np.arange(1, 1000, 10):
+    for cost in np.arange(1, 50, 1):
         store = np.array([bCap / 2])
         for i in range(time):
             newPrice, delta = MarketClearing(i, c[i], r, prices, store[-1], belief[-1], bCap, aversion, volatility, consumption, n, spike)

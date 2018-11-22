@@ -34,9 +34,9 @@ def GetForecast(c, r, prices, setting, aversion, n, volatility, time, consumptio
     elif(setting == 3):
         return fundamentalPrice - 3 * (prices[-2] - fundamentalPrice)
     elif(setting == 4):
-        return fundamentalPrice + 20
+        return fundamentalPrice
     elif(setting == 5):
-        return fundamentalPrice - 20
+        return fundamentalPrice
 #generation function
 def Generation(consumption, c, time):
     if (time == 70): return consumption + c #+ 20000
@@ -70,11 +70,11 @@ def main(beta, r):
     # r = 0.05
     prices = np.array([-1, 1])
     prices2 = prices
-    belief1 = np.array([1/4])
-    belief2 = np.array([1/4])
+    belief1 = np.array([1/2])
+    belief2 = np.array([1/2])
     belief3 = np.array([0/4])
-    belief4 = np.array([1/4])
-    belief5 = np.array([1/4])
+    belief4 = np.array([0/4])
+    belief5 = np.array([0/4])
     bCap = 50000
     aversion = 2
     volatility = 3
@@ -84,7 +84,7 @@ def main(beta, r):
     movement = 5
     # beta = 0.03
     eta = 0.1
-    cost = 1
+    cost = 2
 
     beliefAvg = []
     storage = []

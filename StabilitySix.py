@@ -27,7 +27,7 @@ def GetForecast(c, r, prices, belief, aversion, n, volatility, time, consumption
     if (belief == 1):
         return fundamentalPrice
     else:
-        return fundamentalPrice + 1.03 * (prices[-2] - fundamentalPrice)
+        return fundamentalPrice - 5 * (prices[-2] - fundamentalPrice)
 
 #generation function
 def Generation(consumption, c, time, spike):
@@ -50,7 +50,7 @@ def ForecastPercentage(beta, c, r, prices, aversion, volatility, cost, n, time, 
 
     return eta * 1 / (1 + np.exp(beta * (pi2 - pi1))) + (1 - eta) * belief[-1]
 
-def main(r, cost):
+def main(r, beta):
     # r = 0.05
     prices = np.array([0, 0])
     prices2 = prices
@@ -63,9 +63,9 @@ def main(r, cost):
     n = 100
     gamma = 0.0001
     # movement = 1.03
-    beta = 0.03
+    # beta = 0.03
     eta = 0.1
-    # cost = 1
+    cost = 1
 
     beliefAvg = []
     storage = []
@@ -74,7 +74,7 @@ def main(r, cost):
     c = 200 * np.sin(np.linspace(1, time/12, time))
     distrubance = 0.01
     movement = 1.03
-    spike = 20000
+    spike = 0
     start = 0
     store = np.array([bCap / 2])
     #loop over time
@@ -133,16 +133,16 @@ if (__name__ == '__main__'):
             # for eta in np.arange(0.1, 0.8, 0.1):
         temp = []
         for cost in np.arange(0, 30, 1):
-            # try:
-            counter, prices, belief = main(r, cost)
-            temp = np.append(temp, counter)
-            print("for r:", r, " and cost: ", cost, " we see derivative: ", counter)
-            # except:
-            #     print("for r:", r, " and beta:", cost, " we see divergence")
-            #     temp = np.append(temp, np.inf)
-            #     continue
-                # if(Checker(temp)):
-                    # jump = np.arange(0, 30, 1)[np.where(np.diff(temp) == np.max(np.diff(temp)))[0][0]]
+            try:
+                counter, prices, belief = main(r, cost)
+                temp = np.append(temp, counter)
+                print("for r:", r, " and cost: ", cost, " we see derivative: ", counter)
+            except:
+                print("for r:", r, " and beta:", cost, " we see divergence")
+                temp = np.append(temp, np.inf)
+                continue
+                if(Checker(temp)):
+                    jump = np.arange(0, 30, 1)[np.where(np.diff(temp) == np.max(np.diff(temp)))[0][0]]
             values.append(np.asarray([counter, r, cost]))
                 # else:
                     # values.append(np.asarray([np.nan, r, beta, eta]))

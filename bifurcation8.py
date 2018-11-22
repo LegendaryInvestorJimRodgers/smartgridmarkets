@@ -109,10 +109,10 @@ def generation(generationMat, mean, i):
 #per participant
 variances = []
 values = []
-for k in range(1, 101, 1):
+for k in range(1, 101, 10):
     n = 100
     time = 100
-    prob1 = 0.3
+    prob1 = 0.5
     capacities = np.array([400, 250])
     aversion = np.array([2])
     consumption = np.array([40])
@@ -151,7 +151,8 @@ for k in range(1, 101, 1):
         generationArray = np.append(generationArray, generation(generationArray, np.sum(consumptionMat), i)) #with mean
         prices = np.append(prices, newPrice)
 
-    print(np.var(prices))
+    print(np.min(prices))
+    print(np.max(prices))
     variances = np.append(variances, np.var(prices))
     for k in range(time):
         percent = (beliefs[:, k] == 1).sum() / len(beliefs[:, 0])
